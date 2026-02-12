@@ -1,0 +1,16 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local testing videos
+local_videos/
+*.mp4
+*.mov
+*.avi
+
+# OS files
+.DS_Store
+Thumbs.db

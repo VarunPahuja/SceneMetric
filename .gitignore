@@ -4,6 +4,10 @@ venv/
 # Python cache
 __pycache__/
 *.pyc
+tempCodeRunnerFile.py
+
+# Archived artifacts
+models/archive/
 
 # Local testing videos
 local_videos/

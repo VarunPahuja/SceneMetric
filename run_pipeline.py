@@ -13,7 +13,7 @@ from collections import Counter
 from modules.visual_story import analyse_video
 
 # ── CONFIG ───────────────────────────────────────────────────────────────────
-VIDEO_PATH  = "local_videos/1.mp4"
+VIDEO_PATH  = "local_videos/2.mp4"
 MODEL_PATH  = "models/resnet18_revamped_f109451_20260405_131846.pt"
 CLASS_NAMES = ["CLOSE", "MEDIUM", "WIDE"]
 IMG_SIZE    = 224

@@ -265,8 +265,9 @@ def extract_frame_signals(
         gray = cv2.resize(gray, (320, 180))   # downsample for speed
 
         # Shot scale from Module 1 (or fallback)
-        if shot_labels and frame_idx < len(shot_labels):
-            scale = shot_labels[frame_idx]
+        sampled_idx = len(results)   # how many frames we've processed so far
+        if shot_labels and sampled_idx < len(shot_labels):
+            scale = shot_labels[sampled_idx]
         else:
             scale = "UNKNOWN"
 
@@ -440,8 +441,9 @@ SCALE_DESC = {
 def generate_narrative(segments: List[SceneSegment],
                        transitions: List[str]) -> str:
     """
-    Builds a paragraph narrative from segment summaries and transitions.
-    Pure rule-based — no LLM, no external API.
+    Cinematic narrative generator — builds a rich paragraph from actual
+    segment data rather than fixed templates.
+    Handles short clips (< 6 segments) and long films (many segments) well.
     """
     if not segments:
         return "No segments detected — video may be too short."
@@ -449,44 +451,166 @@ def generate_narrative(segments: List[SceneSegment],
     n   = len(segments)
     mid = n // 2
 
-    opening_tag = segments[0].dominant_tag
-    middle_tag  = segments[mid].dominant_tag
-    closing_tag = segments[-1].dominant_tag
+    # ── Aggregate stats across full video ────────────────────────────────────
+    all_tags    = [s.dominant_tag  for s in segments]
+    all_scales  = [s.shot_scale    for s in segments]
+    tag_counts  = Counter(all_tags)
+    scale_counts= Counter(all_scales)
+    dominant_mood  = tag_counts.most_common(1)[0][0]
+    dominant_scale = scale_counts.most_common(1)[0][0]
 
-    opening_scale = SCALE_DESC.get(segments[0].shot_scale,   "varied framing")
-    closing_scale = SCALE_DESC.get(segments[-1].shot_scale,  "varied framing")
+    avg_motion  = np.mean([s.avg_motion    for s in segments])
+    avg_sym     = np.mean([s.avg_symmetry  for s in segments])
+    avg_edges   = np.mean([s.avg_edges     for s in segments])
 
+    opening_tag  = segments[0].dominant_tag
+    opening_scale= segments[0].shot_scale
+    closing_tag  = segments[-1].dominant_tag
+    closing_scale= segments[-1].shot_scale
+    middle_tag   = segments[mid].dominant_tag
+
+    # ── Find intensity peaks (highest motion segments) ───────────────────────
+    sorted_by_motion = sorted(segments, key=lambda s: s.avg_motion, reverse=True)
+    peak_segments    = sorted_by_motion[:3]
+    peak_times       = [f"{s.start_sec:.0f}s" for s in peak_segments]
+
+    # ── Collapse transitions into readable acts ───────────────────────────────
+    # Group consecutive same-tag segments into acts
+    acts = []
+    current_tag   = segments[0].dominant_tag
+    act_start     = segments[0].start_sec
+    act_scales    = [segments[0].shot_scale]
+
+    for seg in segments[1:]:
+        if seg.dominant_tag == current_tag:
+            act_scales.append(seg.shot_scale)
+        else:
+            acts.append({
+                "tag":       current_tag,
+                "start":     act_start,
+                "end":       seg.start_sec,
+                "scale":     Counter(act_scales).most_common(1)[0][0],
+            })
+            current_tag = seg.dominant_tag
+            act_start   = seg.start_sec
+            act_scales  = [seg.shot_scale]
+
+    acts.append({
+        "tag":   current_tag,
+        "start": act_start,
+        "end":   segments[-1].end_sec,
+        "scale": Counter(act_scales).most_common(1)[0][0],
+    })
+
+    # ── Cinematic act descriptions ────────────────────────────────────────────
+    ACT_DESC = {
+        "Symmetrical": "a controlled, balanced passage",
+        "Dynamic":     "a kinetic, high-motion sequence",
+        "Dramatic":    "an emotionally intense confrontation",
+        "Minimal":     "a sparse, isolated stretch",
+        "Neutral":     "a measured, transitional passage",
+    }
+    SCALE_SHORT = {
+        "CLOSE":   "tight close-ups",
+        "MEDIUM":  "mid-range framing",
+        "WIDE":    "wide establishing shots",
+        "UNKNOWN": "mixed framing",
+    }
+
+    # ── Build narrative ───────────────────────────────────────────────────────
     lines = []
 
-    # Opening
-    lines.append(OPENING.get(opening_tag, OPENING["Neutral"]))
-    lines.append(f"Shot scale: {opening_scale}.")
+    # --- Overview line ---
+    duration_sec = segments[-1].end_sec
+    mins         = int(duration_sec // 60)
+    secs         = int(duration_sec % 60)
+    duration_str = f"{mins}m {secs}s" if mins > 0 else f"{secs}s"
 
-    # Transitions
+    lines.append(f"Visual analysis of a {duration_str} sequence "
+                 f"across {n} scene segments.\n")
+
+    # --- Shot scale distribution ---
+    scale_parts = []
+    for cls in ["CLOSE", "MEDIUM", "WIDE"]:
+        cnt = scale_counts.get(cls, 0)
+        if cnt > 0:
+            pct = cnt / n * 100
+            scale_parts.append(f"{cls.lower()} ({pct:.0f}%)")
+    lines.append("Shot composition: " + ", ".join(scale_parts) + ".")
+
+    # --- Overall mood ---
+    mood_pct = tag_counts[dominant_mood] / n * 100
+    motion_desc = (
+        "highly kinetic" if avg_motion > 0.05 else
+        "moderately active" if avg_motion > 0.02 else
+        "largely static"
+    )
+    lines.append(f"The sequence is predominantly {dominant_mood.lower()} "
+                 f"({mood_pct:.0f}% of segments) and {motion_desc}.\n")
+
+    # --- Opening ---
+    open_desc  = ACT_DESC.get(opening_tag,  opening_tag.lower())
+    open_scale = SCALE_SHORT.get(opening_scale, "mixed framing")
+    lines.append(f"Opening ({segments[0].start_sec:.0f}s–{segments[2].end_sec:.0f}s): "
+                 f"The sequence begins with {open_desc}, "
+                 f"using {open_scale} to establish the scene.")
+
+    # --- Act breakdown (merge into readable chunks, max 6 acts shown) ---
+    if len(acts) > 1:
+        lines.append(f"\nNarrative acts detected ({len(acts)} total):")
+        # Show at most 6 most significant acts (longest duration)
+        acts_sorted = sorted(acts, key=lambda a: a["end"] - a["start"], reverse=True)
+        shown_acts  = sorted(acts_sorted[:6], key=lambda a: a["start"])
+        for act in shown_acts:
+            dur      = act["end"] - act["start"]
+            desc     = ACT_DESC.get(act["tag"], act["tag"])
+            scale    = SCALE_SHORT.get(act["scale"], "mixed framing")
+            lines.append(f"  {act['start']:.0f}s – {act['end']:.0f}s  |  "
+                         f"{act['tag']:>12}  |  {desc}, {scale}  ({dur:.0f}s)")
+
+    # --- Peak motion moments ---
+    if avg_motion > 0.02 and peak_segments[0].avg_motion > avg_motion * 1.5:
+        lines.append(f"\nHighest intensity moments: {', '.join(peak_times)} "
+                     f"(peak motion: {peak_segments[0].avg_motion:.3f}).")
+
+    # --- Key transitions (top 5 most significant only) ---
     if transitions:
-        lines.append("\nKey visual transitions detected:")
-        lines.extend(transitions)
+        # Prioritise non-trivial transitions (skip Neutral↔Symmetrical noise)
+        key_transitions = [
+            t for t in transitions
+            if not ("Neutral → Symmetrical" in t or "Symmetrical → Neutral" in t)
+        ][:5]
 
-    # Middle
-    lines.append(f"\n{MIDDLE.get(middle_tag, MIDDLE['Neutral'])}")
+        if key_transitions:
+            lines.append(f"\nKey cinematic transitions:")
+            for t in key_transitions:
+                lines.append(f"  {t}")
 
-    # Closing
-    lines.append(CLOSING.get(closing_tag, CLOSING["Neutral"]))
-    lines.append(f"Shot scale: {closing_scale}.")
+    # --- Closing ---
+    close_desc  = ACT_DESC.get(closing_tag,  closing_tag.lower())
+    close_scale = SCALE_SHORT.get(closing_scale, "mixed framing")
+    lines.append(f"\nClosing ({segments[-3].start_sec:.0f}s–{segments[-1].end_sec:.0f}s): "
+                 f"The sequence ends with {close_desc}, "
+                 f"using {close_scale}.")
 
-    # One-liner summary
-    # REPLACE the arc block at the bottom of generate_narrative() with:
-    unique_tags = list(dict.fromkeys([s.dominant_tag for s in segments]))
-    if len(unique_tags) == 1:
-        arc = f"The scene maintains a consistent {unique_tags[0].lower()} visual register throughout."
+    # --- Arc summary ---
+    if opening_tag == closing_tag and len(set(all_tags)) == 1:
+        arc = (f"The sequence holds a single consistent visual register "
+               f"({opening_tag.lower()}) throughout — "
+               f"suggesting deliberate tonal uniformity.")
+    elif opening_tag == closing_tag:
+        arc = (f"Despite internal variation, the sequence returns to its "
+               f"opening register ({opening_tag.lower()}) — a circular visual arc.")
     else:
-        arc_map = TRANSITION_MAP.get(
+        arc_label = TRANSITION_MAP.get(
             (opening_tag, closing_tag),
             f"{opening_tag} shifting to {closing_tag}"
         )
-        arc = f"Overall narrative arc: {arc_map}."
+        arc = f"Overall narrative arc: {arc_label}."
+
     lines.append(f"\n{arc}")
 
+    return "\n".join(lines)
     return "\n".join(lines)
 
 

@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SceneMetric — 2.mp4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0a0a;
+    --bg2:       #111111;
+    --bg3:       #181818;
+    --border:    #242424;
+    --text:      #d4cfc8;
+    --dim:       #5a5550;
+    --close:     #e85d26;
+    --medium:    #f0a500;
+    --wide:      #3b9ede;
+    --accent:    #f0a500;
+    --font-head: 'Bebas Neue', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Crimson Pro', serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 0 2rem;
+    margin-bottom: 3rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-family: var(--font-head);
+    font-size: 4.5rem;
+    letter-spacing: 0.12em;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .header-meta {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--dim);
+    line-height: 1.8;
+  }
+
+  .header-meta strong {
+    color: var(--text);
+    display: block;
+    font-size: 0.85rem;
+  }
+
+  /* ── FILMSTRIP TIMELINE ── */
+  .filmstrip-wrap {
+    margin-bottom: 3rem;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .filmstrip {
+    display: flex;
+    height: 48px;
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 1px;
+    background: var(--border);
+    padding: 1px;
+  }
+
+  .tl-block {
+    flex: 1;
+    min-width: 2px;
+    border-radius: 1px;
+    transition: opacity 0.2s;
+    cursor: default;
+  }
+
+  .tl-block:hover { opacity: 1 !important; }
+
+  .tl-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    transition: background 0.2s;
+  }
+
+  .stat-card:hover { background: var(--bg3); }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 2.2rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .stat-sub {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--dim);
+  }
+
+  /* ── DISTRIBUTION BARS ── */
+  .dist-section {
+    margin-bottom: 3rem;
+  }
+
+  .dist-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 60px;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dist-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .dist-bar-bg {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .dist-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(.16,1,.3,1);
+  }
+
+  .dist-pct {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--dim);
+    text-align: right;
+  }
+
+  /* ── TWO COLUMN ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--dim);
+    text-transform: uppercase;
+    background: var(--bg3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .panel-header::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .panel-body {
+    padding: 1.25rem;
+  }
+
+  /* ── SEGMENTS TABLE ── */
+  .seg-table-wrap {
+    margin-bottom: 3rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    color: var(--dim);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.6rem;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: var(--bg3); }
+
+  td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    border: 1px solid;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mini-bar-wrap {
+    width: 60px;
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  .mini-bar {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* ── TRANSITIONS ── */
+  .transition-row {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .transition-row:last-child { border-bottom: none; }
+
+  /* ── NARRATIVE ── */
+  .narrative-block {
+    margin-bottom: 3rem;
+  }
+
+  .narrative-line {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+  }
+
+  .narrative-indent {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--dim);
+    padding-left: 1.5rem;
+    margin-bottom: 0.25rem;
+    border-left: 2px solid var(--border);
+  }
+
+  /* ── UTILS ── */
+  .mono  { font-family: var(--font-mono); font-size: 0.72rem; }
+  .dim   { color: var(--dim); }
+  .accent { color: var(--accent); }
+
+  .module-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--dim);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim { animation: fadeUp 0.5s ease both; }
+  .anim-1 { animation-delay: 0.05s; }
+  .anim-2 { animation-delay: 0.12s; }
+  .anim-3 { animation-delay: 0.20s; }
+  .anim-4 { animation-delay: 0.28s; }
+  .anim-5 { animation-delay: 0.36s; }
+  .anim-6 { animation-delay: 0.44s; }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col    { grid-template-columns: 1fr; }
+    .logo       { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="header anim">
+    <div>
+      <div class="logo">Scene<span>Metric</span></div>
+      <div class="mono dim" style="margin-top:0.5rem">Cinematic Visual Analysis Pipeline</div>
+    </div>
+    <div class="header-meta">
+      <strong>2.mp4</strong>
+      06 Apr 2026, 15:25<br>
+      Module 1 · Module 2
+    </div>
+  </header>
+
+  <!-- FILMSTRIP TIMELINE -->
+  <div class="filmstrip-wrap anim anim-1">
+    <div class="section-label">Shot Scale Timeline — every 3 seconds</div>
+    <div class="filmstrip">
+      <div class="tl-block" style="background:#e85d26;opacity:0.76" title="CLOSE @ 0.0s (72%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.69" title="MEDIUM @ 3.0s (59%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.71" title="CLOSE @ 5.9s (63%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.76" title="CLOSE @ 8.9s (71%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.70" title="CLOSE @ 11.8s (60%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.74" title="CLOSE @ 14.8s (68%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.77" title="CLOSE @ 17.8s (73%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.77" title="CLOSE @ 20.7s (75%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.81" title="WIDE @ 23.7s (83%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 26.7s (93%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 29.6s (93%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 32.6s (94%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 35.5s (94%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 38.5s (93%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.87" title="WIDE @ 41.5s (93%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.81" title="MEDIUM @ 44.4s (82%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.78" title="MEDIUM @ 47.4s (76%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.81" title="MEDIUM @ 50.3s (81%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.77" title="MEDIUM @ 53.3s (74%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.68" title="MEDIUM @ 56.3s (56%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 59.2s (65%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.72" title="MEDIUM @ 62.2s (63%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 65.1s (66%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.71" title="MEDIUM @ 68.1s (62%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.75" title="WIDE @ 71.1s (71%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.75" title="WIDE @ 74.0s (70%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.72" title="CLOSE @ 77.0s (64%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.69" title="MEDIUM @ 80.0s (58%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.70" title="MEDIUM @ 82.9s (60%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.73" title="CLOSE @ 85.9s (65%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.79" title="WIDE @ 88.8s (79%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.80" title="WIDE @ 91.8s (81%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.72" title="CLOSE @ 94.8s (65%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.82" title="CLOSE @ 97.7s (84%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.81" title="WIDE @ 100.7s (81%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.86" title="WIDE @ 103.6s (91%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.71" title="CLOSE @ 106.6s (61%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.75" title="CLOSE @ 109.6s (70%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.72" title="MEDIUM @ 112.5s (65%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.84" title="WIDE @ 115.5s (88%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.75" title="CLOSE @ 118.5s (69%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.75" title="CLOSE @ 121.4s (70%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.72" title="CLOSE @ 124.4s (63%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.78" title="CLOSE @ 127.3s (75%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.75" title="WIDE @ 130.3s (69%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.73" title="WIDE @ 133.3s (65%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.77" title="CLOSE @ 136.2s (74%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.77" title="WIDE @ 139.2s (75%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.85" title="WIDE @ 142.1s (90%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.83" title="MEDIUM @ 145.1s (86%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.81" title="MEDIUM @ 148.1s (82%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.81" title="MEDIUM @ 151.0s (82%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.69" title="MEDIUM @ 154.0s (58%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.65" title="CLOSE @ 156.9s (50%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.66" title="CLOSE @ 159.9s (51%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.67" title="CLOSE @ 162.9s (54%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.65" title="CLOSE @ 165.8s (50%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.73" title="CLOSE @ 168.8s (66%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.75" title="MEDIUM @ 171.8s (70%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.63" title="CLOSE @ 174.7s (45%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.77" title="MEDIUM @ 177.7s (74%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.63" title="CLOSE @ 180.6s (46%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.72" title="CLOSE @ 183.6s (63%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.78" title="MEDIUM @ 186.6s (76%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.65" title="MEDIUM @ 189.5s (49%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.80" title="MEDIUM @ 192.5s (80%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.64" title="CLOSE @ 195.4s (49%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.82" title="WIDE @ 198.4s (85%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.82" title="MEDIUM @ 201.4s (85%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.76" title="WIDE @ 204.3s (72%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.76" title="MEDIUM @ 207.3s (72%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 210.3s (65%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.75" title="WIDE @ 213.2s (70%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.85" title="WIDE @ 216.2s (89%)"></div><div class="tl-block" style="background:#3b9ede;opacity:0.79" title="WIDE @ 219.1s (78%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.68" title="MEDIUM @ 222.1s (56%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.74" title="MEDIUM @ 225.1s (69%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 228.0s (66%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 231.0s (67%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.69" title="MEDIUM @ 233.9s (58%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.75" title="MEDIUM @ 236.9s (71%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.74" title="MEDIUM @ 239.9s (68%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.69" title="MEDIUM @ 242.8s (59%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.77" title="MEDIUM @ 245.8s (75%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.73" title="MEDIUM @ 248.7s (66%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.70" title="MEDIUM @ 251.7s (59%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.65" title="MEDIUM @ 254.7s (50%)"></div><div class="tl-block" style="background:#e85d26;opacity:0.68" title="CLOSE @ 257.6s (55%)"></div><div class="tl-block" style="background:#f0a500;opacity:0.68" title="MEDIUM @ 260.6s (55%)"></div>
+    </div>
+    <div class="tl-legend">
+      <span><span class="legend-dot" style="background:var(--close)"></span>CLOSE</span>
+      <span><span class="legend-dot" style="background:var(--medium)"></span>MEDIUM</span>
+      <span><span class="legend-dot" style="background:var(--wide)"></span>WIDE</span>
+      <span class="dim">hover for details</span>
+    </div>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid anim anim-2">
+    <div class="stat-card">
+      <div class="stat-label">Duration</div>
+      <div class="stat-value accent">4m 22s</div>
+      <div class="stat-sub">6304 frames · 24fps</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Confidence</div>
+      <div class="stat-value">70<span style="font-size:1.2rem">%</span></div>
+      <div class="stat-sub">Module 1 · ResNet18</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Segments</div>
+      <div class="stat-value">68</div>
+      <div class="stat-sub">Module 2 · 2s windows</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Transitions</div>
+      <div class="stat-value">24</div>
+      <div class="stat-sub">visual narrative shifts</div>
+    </div>
+  </div>
+
+  <!-- MODULE 1 -->
+  <div class="anim anim-3">
+    <div class="module-badge">MODULE 01 — SHOT SCALE CLASSIFICATION · ResNet18 · Fine-tuned</div>
+    <div class="dist-section">
+      <div class="dist-row">
+        <div class="dist-label" style="color:var(--close)">CLOSE</div>
+        <div class="dist-bar-bg">
+          <div class="dist-bar-fill" style="width:28.9%;background:var(--close)"></div>
+        </div>
+        <div class="dist-pct">28.9%</div>
+      </div>
+      <div class="dist-row">
+        <div class="dist-label" style="color:var(--medium)">MEDIUM</div>
+        <div class="dist-bar-bg">
+          <div class="dist-bar-fill" style="width:46.7%;background:var(--medium)"></div>
+        </div>
+        <div class="dist-pct">46.7%</div>
+      </div>
+      <div class="dist-row">
+        <div class="dist-label" style="color:var(--wide)">WIDE</div>
+        <div class="dist-bar-bg">
+          <div class="dist-bar-fill" style="width:24.4%;background:var(--wide)"></div>
+        </div>
+        <div class="dist-pct">24.4%</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- MODULE 2 -->
+  <div class="anim anim-4">
+    <div class="module-badge">MODULE 02 — VISUAL STORY GENERATOR · Classical CV · Rule-based</div>
+  </div>
+
+  <!-- SEGMENTS TABLE -->
+  <div class="seg-table-wrap panel anim anim-4">
+    <div class="panel-header">Scene Segments — Classical CV Signals</div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th>Style Tag</th>
+          <th>Shot Scale</th>
+          <th>Motion (Optical Flow)</th>
+          <th>Edges (Canny)</th>
+          <th>Symmetry</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+            <td class="mono dim">00</td>
+            <td class="mono">0.0s – 3.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:24%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.030</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:95%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.095</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.817</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">01</td>
+            <td class="mono">3.9s – 7.8s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:33%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.041</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:70%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.070</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.899</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">02</td>
+            <td class="mono">7.8s – 11.7s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:32%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.041</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:65%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.066</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:84%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.841</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">03</td>
+            <td class="mono">11.8s – 15.6s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:34%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.043</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:54%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.055</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:82%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.829</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">04</td>
+            <td class="mono">15.7s – 19.5s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:39%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.050</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:84%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.084</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:84%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.845</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">05</td>
+            <td class="mono">19.6s – 23.4s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:30%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.038</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.081</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:84%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.841</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">06</td>
+            <td class="mono">23.5s – 27.4s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:7%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.009</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:69%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.069</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.878</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">07</td>
+            <td class="mono">27.4s – 31.3s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:1%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.002</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:62%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.062</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.891</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">08</td>
+            <td class="mono">31.4s – 35.2s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:1%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.002</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:62%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.063</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.891</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">09</td>
+            <td class="mono">35.3s – 39.1s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:1%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.002</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:63%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.063</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.891</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">10</td>
+            <td class="mono">39.2s – 43.0s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:1%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.002</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:62%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.063</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.891</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">11</td>
+            <td class="mono">43.1s – 47.0s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:10%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.013</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:79%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.079</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.867</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">12</td>
+            <td class="mono">47.0s – 50.9s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:10%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.013</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.110</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:82%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.823</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">13</td>
+            <td class="mono">51.0s – 54.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:19%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.024</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.104</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.815</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">14</td>
+            <td class="mono">54.9s – 58.7s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:19%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.025</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:92%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.092</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:84%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.846</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">15</td>
+            <td class="mono">58.8s – 62.6s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:11%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.014</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:97%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.097</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.861</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">16</td>
+            <td class="mono">62.7s – 66.6s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:7%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.010</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:94%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.095</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.856</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">17</td>
+            <td class="mono">66.6s – 70.5s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:39%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.049</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:65%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.065</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:88%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.886</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">18</td>
+            <td class="mono">70.6s – 74.4s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:36%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.046</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:63%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.064</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:88%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.882</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">19</td>
+            <td class="mono">74.5s – 78.3s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:30%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.038</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:90%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.091</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.868</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">20</td>
+            <td class="mono">78.4s – 82.2s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:53%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.067</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:65%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.065</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.809</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">21</td>
+            <td class="mono">82.3s – 86.2s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:40%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.051</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.177</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.895</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">22</td>
+            <td class="mono">86.3s – 90.1s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:76%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.096</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.087</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.815</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">23</td>
+            <td class="mono">90.2s – 94.0s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:51%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.064</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.186</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.875</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">24</td>
+            <td class="mono">94.1s – 97.9s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:72%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.091</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:54%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.054</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.855</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">25</td>
+            <td class="mono">98.0s – 101.9s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:39%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.050</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:41%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.042</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.813</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">26</td>
+            <td class="mono">101.9s – 105.8s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:35%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.044</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.130</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:90%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.903</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">27</td>
+            <td class="mono">105.9s – 109.7s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:56%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.071</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:65%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.066</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.853</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">28</td>
+            <td class="mono">109.8s – 113.6s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:41%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.051</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:33%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.033</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.814</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">29</td>
+            <td class="mono">113.7s – 117.5s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.100</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.167</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.857</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">30</td>
+            <td class="mono">117.6s – 121.5s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:55%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.070</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:40%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.040</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.856</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">31</td>
+            <td class="mono">121.5s – 125.4s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:70%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.088</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:58%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.059</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:76%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.764</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">32</td>
+            <td class="mono">125.5s – 129.3s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:38%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.048</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:44%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.044</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.873</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">33</td>
+            <td class="mono">129.4s – 133.2s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:95%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.119</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.121</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.808</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">34</td>
+            <td class="mono">133.3s – 137.1s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.109</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.145</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.809</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">35</td>
+            <td class="mono">137.2s – 141.1s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:68%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.086</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.086</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:75%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.753</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">36</td>
+            <td class="mono">141.1s – 145.0s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:24%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.031</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:21%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.022</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:91%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.920</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">37</td>
+            <td class="mono">145.1s – 148.9s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:26%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.034</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:54%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.055</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:83%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.839</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">38</td>
+            <td class="mono">149.0s – 152.8s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:48%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.061</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:54%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.054</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.850</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">39</td>
+            <td class="mono">152.9s – 156.7s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:32%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.041</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:41%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.041</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:91%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.919</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">40</td>
+            <td class="mono">156.8s – 160.7s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:9%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.012</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.088</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.801</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">41</td>
+            <td class="mono">160.7s – 164.6s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:6%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.008</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:93%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.094</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:77%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.776</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">42</td>
+            <td class="mono">164.7s – 168.5s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:25%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.031</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:90%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.090</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:78%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.786</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">43</td>
+            <td class="mono">168.6s – 172.4s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:36%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.046</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:76%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.076</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:74%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.742</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">44</td>
+            <td class="mono">172.5s – 176.3s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:22%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.028</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:46%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.046</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:86%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.861</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">45</td>
+            <td class="mono">176.4s – 180.3s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:16%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.020</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:64%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.064</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.808</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">46</td>
+            <td class="mono">180.3s – 184.2s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:28%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.036</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:57%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.058</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.808</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">47</td>
+            <td class="mono">184.3s – 188.1s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:25%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.032</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:69%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.070</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:78%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.781</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">48</td>
+            <td class="mono">188.2s – 192.0s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:28%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.036</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:64%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.064</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:88%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.887</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">49</td>
+            <td class="mono">192.1s – 195.9s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:13%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.017</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:96%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.097</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:75%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.754</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">50</td>
+            <td class="mono">196.0s – 199.9s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:22%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.028</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:63%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.063</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.900</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">51</td>
+            <td class="mono">199.9s – 203.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:12%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.016</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:71%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.071</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.811</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">52</td>
+            <td class="mono">203.9s – 207.7s</td>
+            <td><span class="tag-pill" style="border-color:#e85d26;color:#e85d26">Dynamic</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:26%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.033</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:70%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.071</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.879</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">53</td>
+            <td class="mono">207.8s – 211.6s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:21%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.027</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.088</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.858</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">54</td>
+            <td class="mono">211.7s – 215.5s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:20%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.026</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.117</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:88%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.889</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">55</td>
+            <td class="mono">215.6s – 219.5s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">○ WIDE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:18%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.023</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.090</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:90%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.905</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">56</td>
+            <td class="mono">219.6s – 223.4s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:15%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.020</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:66%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.066</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:88%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.885</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">57</td>
+            <td class="mono">223.5s – 227.3s</td>
+            <td><span class="tag-pill" style="border-color:#7f8c8d;color:#7f8c8d">Neutral</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:28%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.036</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.109</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:80%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.805</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">58</td>
+            <td class="mono">227.4s – 231.2s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:22%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.028</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:99%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.099</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.859</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">59</td>
+            <td class="mono">231.3s – 235.2s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:22%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.028</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:81%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.082</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.851</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">60</td>
+            <td class="mono">235.2s – 239.1s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:19%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.025</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:91%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.091</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:83%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.830</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">61</td>
+            <td class="mono">239.2s – 243.0s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:19%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.024</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:79%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.079</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.851</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">62</td>
+            <td class="mono">243.1s – 246.9s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:21%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.027</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:96%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.096</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:83%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.835</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">63</td>
+            <td class="mono">247.0s – 250.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:17%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.021</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:74%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.075</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.858</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">64</td>
+            <td class="mono">250.9s – 254.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:16%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.020</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:71%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.071</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.872</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">65</td>
+            <td class="mono">254.8s – 258.7s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:14%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.019</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:100%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.116</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:85%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.851</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">66</td>
+            <td class="mono">258.8s – 262.6s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◉ CLOSE</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:9%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.012</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:89%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.090</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:87%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.876</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mono dim">67</td>
+            <td class="mono">262.7s – 262.8s</td>
+            <td><span class="tag-pill" style="border-color:#3b9ede;color:#3b9ede">Symmetrical</span></td>
+            <td class="mono">◎ MEDIUM</td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:1%;background:#e85d26"></div>
+                </div>
+                <span class="mono dim">0.002</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:47%;background:#f0a500"></div>
+                </div>
+                <span class="mono dim">0.047</span>
+            </td>
+            <td>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:91%;background:#3b9ede"></div>
+                </div>
+                <span class="mono dim">0.917</span>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- TRANSITIONS + NARRATIVE -->
+  <div class="two-col anim anim-5">
+    <div class="panel">
+      <div class="panel-header">Cinematic Transitions</div>
+      <div class="panel-body" style="max-height:320px;overflow-y:auto">
+        <div class="transition-row"><span class="mono dim">[0.0s → 7.8s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[15.7s → 23.4s]  Action → Calm</span></div><div class="transition-row"><span class="mono dim">[19.6s → 27.4s]  Calm → Action</span></div><div class="transition-row"><span class="mono dim">[43.1s → 50.9s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[62.7s → 70.5s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[70.6s → 78.3s]  Action → Calm</span></div><div class="transition-row"><span class="mono dim">[74.5s → 82.2s]  Calm → Action</span></div><div class="transition-row"><span class="mono dim">[94.1s → 101.9s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[98.0s → 105.8s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[137.2s → 145.0s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[141.1s → 148.9s]  Symmetrical → Neutral</span></div><div class="transition-row"><span class="mono dim">[145.1s → 152.8s]  Calm → Action</span></div><div class="transition-row"><span class="mono dim">[149.0s → 156.7s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[160.7s → 168.5s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[168.6s → 176.3s]  Action → Calm</span></div><div class="transition-row"><span class="mono dim">[172.5s → 180.3s]  Neutral → Symmetrical</span></div><div class="transition-row"><span class="mono dim">[176.4s → 184.2s]  Symmetrical → Neutral</span></div><div class="transition-row"><span class="mono dim">[180.3s → 188.1s]  Neutral → Symmetrical</span></div><div class="transition-row"><span class="mono dim">[184.3s → 192.0s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[188.2s → 195.9s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[199.9s → 207.7s]  Controlled → Chaos</span></div><div class="transition-row"><span class="mono dim">[203.9s → 211.6s]  Chaos → Control</span></div><div class="transition-row"><span class="mono dim">[219.6s → 227.3s]  Symmetrical → Neutral</span></div><div class="transition-row"><span class="mono dim">[223.5s → 231.2s]  Neutral → Symmetrical</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Narrative Analysis</div>
+      <div class="panel-body narrative-block" style="max-height:320px;overflow-y:auto">
+        <p class="narrative-line">Visual analysis of a 4m 22s sequence across 68 scene segments.</p><br><p class="narrative-line">Shot composition: close (29%), medium (46%), wide (25%).</p><p class="narrative-line">The sequence is predominantly dynamic (47% of segments) and moderately active.</p><br><p class="narrative-line">Opening (0s–12s): The sequence begins with a controlled, balanced passage, using tight close-ups to establish the scene.</p><br><p class="narrative-line">Narrative acts detected (25 total):</p><p class="narrative-line">4s – 20s  |       Dynamic  |  a kinetic, high-motion sequence, tight close-ups  (16s)</p><p class="narrative-line">24s – 47s  |       Dynamic  |  a kinetic, high-motion sequence, wide establishing shots  (24s)</p><p class="narrative-line">47s – 67s  |   Symmetrical  |  a controlled, balanced passage, mid-range framing  (20s)</p><p class="narrative-line">78s – 98s  |       Dynamic  |  a kinetic, high-motion sequence, tight close-ups  (20s)</p><p class="narrative-line">102s – 141s  |       Dynamic  |  a kinetic, high-motion sequence, wide establishing shots  (39s)</p><p class="narrative-line">227s – 263s  |   Symmetrical  |  a controlled, balanced passage, mid-range framing  (35s)</p><br><p class="narrative-line">Highest intensity moments: 129s, 133s, 114s (peak motion: 0.119).</p><br><p class="narrative-line">Key cinematic transitions:</p><p class="narrative-line">[0.0s → 7.8s]  Controlled → Chaos</p><p class="narrative-line">[15.7s → 23.4s]  Action → Calm</p><p class="narrative-line">[19.6s → 27.4s]  Calm → Action</p><p class="narrative-line">[43.1s → 50.9s]  Chaos → Control</p><p class="narrative-line">[62.7s → 70.5s]  Controlled → Chaos</p><br><p class="narrative-line">Closing (255s–263s): The sequence ends with a controlled, balanced passage, using mid-range framing.</p><br><p class="narrative-line">Despite internal variation, the sequence returns to its opening register (symmetrical) — a circular visual arc.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer anim anim-6">
+    <span>SceneMetric · Computer Vision Project</span>
+    <span>Module 1: CNN Shot Classification · Module 2: Classical CV Narrative Synthesis</span>
+    <span class="accent">F1: 0.9451</span>
+  </footer>
+
+</div>
+</body>
+</html>
